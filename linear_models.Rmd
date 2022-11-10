@@ -74,4 +74,26 @@ fit_alt = lm(price ~ stars + borough, data = nyc_airbnb)
 anova(fit_null, fit_alt) %>% 
   broom::tidy()
 ```
+# interations 
+
+```{r}
+fit = 
+nyc_airbnb %>% 
+  lm(price ~ stars + room_type * borough, data = .) %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+```
+
+fit models by borough 
+```{r}
+nest_lm_res =
+  nyc_airbnb %>% 
+  nest(df = -borough) %>% 
+  mutate(
+    models = map(.x = df, ~lm(price ~ stars + room_type, data = .x)),
+    results = map(models, broom::tidy)) %>% 
+  select(-df, -models) %>% 
+  unnest(results)
+```
+
 

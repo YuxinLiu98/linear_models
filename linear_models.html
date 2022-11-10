@@ -473,6 +473,23 @@ anova(fit_null, fit_alt) %&gt;%
 ## 2 price ~ stars + borough       30525    1.01e9     3  2.53e7    256.  7.84e-164
 ## # … with abbreviated variable name ¹​statistic</code></pre>
 </div>
+<div id="interations" class="section level1">
+<h1>interations</h1>
+<pre class="r"><code>fit = 
+nyc_airbnb %&gt;% 
+  lm(price ~ stars + room_type * borough, data = .) %&gt;% 
+  broom::tidy() %&gt;% 
+  knitr::kable(digits = 3)</code></pre>
+<p>fit models by borough</p>
+<pre class="r"><code>nest_lm_res =
+  nyc_airbnb %&gt;% 
+  nest(df = -borough) %&gt;% 
+  mutate(
+    models = map(.x = df, ~lm(price ~ stars + room_type, data = .x)),
+    results = map(models, broom::tidy)) %&gt;% 
+  select(-df, -models) %&gt;% 
+  unnest(results)</code></pre>
+</div>
 
 
 
