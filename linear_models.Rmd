@@ -1,0 +1,77 @@
+---
+title: "linear_models"
+output: html_document
+date: "2022-11-10"
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(p8105.datasets)
+
+set.seed(1)
+
+```
+
+```{r}
+data("nyc_airbnb")
+
+nyc_airbnb = 
+  nyc_airbnb %>% 
+  mutate(stars = review_scores_location / 2) %>% 
+  rename(
+    borough = neighbourhood_group,
+    neighborhood = neighbourhood) %>% 
+  filter(borough != "Staten Island") %>% 
+  select(price, stars, borough, neighborhood, room_type)
+```
+
+```{r}
+fit = lm(price ~ stars + borough, data = nyc_airbnb)
+summary(fit)
+```
+
+```{r}
+fit %>% 
+  broom::tidy() %>% 
+  mutate (term = str_replace(term, "borough", "Borough: ")) %>% 
+  select (term, estimate, p.value)
+```
+
+change reference category 
+```{r}
+fit = 
+  nyc_airbnb %>% 
+  mutate(
+    borough = fct_infreq(borough)) %>% 
+  lm(price ~ stars + borough, data =.)
+
+fit %>% 
+  broom::tidy() %>% 
+  mutate (term = str_replace(term, "borough", "Borough: ")) %>% 
+  select (term, estimate, p.value)
+```
+# Diagnostics 
+```{r}
+modelr::add_residuals(nyc_airbnb, fit) %>% 
+  ggplot(aes(x = stars, y = resid)) + geom_point()
+```
+```{r}
+nyc_airbnb %>% 
+  modelr::add_residuals(fit) %>% 
+  ggplot(aes(x = borough, y = resid)) + geom_violin() +
+  ylim (-250, 250)
+```
+# Hypothesis testing
+
+```{r}
+fit %>% 
+  broom::tidy()
+```
+```{r}
+fit_null = lm(price ~ stars , data = nyc_airbnb)
+fit_alt = lm(price ~ stars + borough, data = nyc_airbnb)
+
+anova(fit_null, fit_alt) %>% 
+  broom::tidy()
+```
+
