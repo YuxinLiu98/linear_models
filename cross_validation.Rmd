@@ -1,0 +1,12 @@
+---
+title: "cross_validation"
+output: github_document
+date: "2022-11-15"
+---
+
+```{r setup}
+library(tidyverse)
+library(modelr)
+library(mgcv)
+```
+
